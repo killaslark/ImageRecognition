@@ -16,20 +16,38 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 public class MainActivity extends AppCompatActivity {
 
     private Bitmap bitmap;
     private ImageView imageNumber;
+    private TextView textNumber;
     private Integer REQUEST_CAMERA = 1, SELECT_FILE = 0;
 
     private int[] chainFrequency = new int[8];
+    private final int[][] numberFrequency = new int[][]{
+            {16,12,42,12,16,13,40,13},
+            { 9, 0,65, 8,14, 1,58,14},
+            {51,12,28,38,61, 8,26,44},
+            {44,27,37,28,45,27,36,29},
+            {13, 1,63, 1,41, 1,35,29},
+            {65,21,44,24,59,22,48,19},
+            {32,22,40,23,31,21,43,21},
+            {41, 0,39,25,38, 1,40,23},
+            {23,19,28,19,22,20,27,19},
+            {32,21,42,21,33,21,41,22}
+    };
 
 
     @Override
@@ -41,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         Button buttonPredict = (Button) findViewById(R.id.buttonPredict);
         Button buttonUpload = (Button) findViewById(R.id.buttonUpload);
         imageNumber = (ImageView) findViewById(R.id.imageNumber);
+        textNumber = (TextView) findViewById(R.id.textView);
 
         buttonUpload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         for (int j = 0; j < height && !found; j++) {
             for (int i = 0; i < width && !found; i++){
                 pixel = bitmap.getPixel(i,j);
-                if (Color.red(pixel) == 0 && Color.green(pixel) == 0 && Color.blue(pixel) == 0) {
+                if (isPixelBlack(pixel)) {
                     // i itu x, j itu y
                     Log.d("Found",i+","+ j);
                         iStart = i;
@@ -116,20 +135,35 @@ public class MainActivity extends AppCompatActivity {
             int iKeliling = iStart, jKeliling = jStart;
             checkTimur(iKeliling, jKeliling, bitmap, chainCode, iStart, jStart);
 
-
-            for (int i = 0 ; i < 8; i ++) {
-                Log.d("Arah["+i+"] :" , chainFrequency[i]+" kemunculan");
-                chainFrequency[i] = 0;
+        int minSum = -1;
+        int idx = -1;
+        for(int i = 0;i<10;i++) {
+            int[] normalizedFreq = normalizeHistogram(chainFrequency,numberFrequency[i]);
+            int sum = 0;
+            for (int j = 0; j < 8; j++) {
+                sum += Math.abs(numberFrequency[i][j] - normalizedFreq[j]);
             }
+            if (sum < minSum || minSum == -1) {
+                idx = i;
+                minSum = sum;
+            }
+        }
+        for (int i = 0; i < 8; i++) {
+            Log.d("Arah[" + i + "] :", chainFrequency[i] + " kemunculan");
+            chainFrequency[i] = 0;
+        }
+        String predictedText = "Predicted Number: "+Integer.toString(idx);
+        textNumber.setText(predictedText);
+        Log.d("Number Predicted", Integer.toString(idx));
     }
 
     private boolean isPixelBlack(int pixel) {
-        int limit = 50;
+        int limit = 40;
         return (Color.red(pixel) < limit && Color.green(pixel) < limit && Color.blue(pixel) < limit);
     }
 
     private void checkTimur(int iKeliling, int jKeliling, Bitmap bitmap, Vector chainCode, int iStart,int jStart) {
-        if (iKeliling + 1 < bitmap.getHeight()) {
+        if (iKeliling + 1 < bitmap.getWidth()) {
 
             int pixel = bitmap.getPixel(iKeliling + 1, jKeliling);
 //            Log.d("Timur" , iKeliling +","+ jKeliling);
@@ -164,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private  void checkSelatan(int iKeliling, int jKeliling, Bitmap bitmap, Vector chainCode, int iStart,int jStart) {
-        if (jKeliling + 1 < bitmap.getWidth()){
+        if (jKeliling + 1 < bitmap.getHeight()){
 //            Log.d("Selatan" , iKeliling +","+ jKeliling);
             int pixel = bitmap.getPixel(iKeliling, jKeliling + 1);
             if (isPixelBlack(pixel)) {
@@ -265,7 +299,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private int[] normalizeHistogram(int[] from, int[] to)
+    {
+        int[] newHist = new int[from.length];
+        int oldMin = getMin(from);
+        int newMin = getMin(to);
+        int oldRange = getMax(from) - oldMin;
+        int newRange = getMax(to) - newMin;
+        if(from.length == to.length) {
+            for (int i = 0; i < from.length; i++)
+            {
+                newHist[i] = Math.round(((float)((from[i] - oldMin) * newRange)/(float)oldRange) + newMin);
+            }
+        }
+        return newHist;
+    }
 
+    private int getMax(int[] arr){
+        int max = -1;
+        for(int i = 0;i < arr.length;i++)
+        {
+            if(max < arr[i])
+                max = arr[i];
+        }
+        return max;
+    }
+
+    private int getMin(int[] arr){
+        int min = 9999;
+        for(int i = 0;i < arr.length;i++)
+        {
+            if(min > arr[i])
+                min = arr[i];
+        }
+        return min;
+    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
