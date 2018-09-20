@@ -36,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private Integer REQUEST_CAMERA = 1, SELECT_FILE = 0;
 
     private int[] chainFrequency = new int[8];
+    private int[] operand = new int[2];
+    private int operator;
+    private int operandPointer;
     private final double[][] numberFrequency = new double[][]{
             //Angka 0
             {0.097560976,0.073170732,0.256097561,0.073170732,0.097560976,0.079268293,0.243902439,0.079268293},
@@ -92,7 +95,10 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 8 ; i++) {
             chainFrequency[i] = 0;
         }
-
+        operand[0] = -1;
+        operand[1] = -1;
+        operator = -1;
+        operandPointer = 0;
     }
 
 
@@ -162,13 +168,41 @@ public class MainActivity extends AppCompatActivity {
                 minSum = sum;
             }
         }
+        //Set operand and operator
+        if(idx < 10){
+            operand[operandPointer] = idx;
+            operandPointer = operandPointer+1 > 1 ? 0 : operandPointer+1;
+        } else {
+            operator = idx;
+        }
+
         for (int i = 0; i < 8; i++) {
             Log.d("Arah[" + i + "] :", chainFrequency[i] + " kemunculan");
             chainFrequency[i] = 0;
         }
-        String predictedText = "Predicted Number: "+Integer.toString(idx);
-        textNumber.setText(predictedText);
+
+        //Update Text
+        updateTextView();
         Log.d("Number Predicted", Integer.toString(idx));
+    }
+
+    private void updateTextView(){
+        String operand1 = operand[0] == -1 ? "Operand1" : Integer.toString(operand[0]);
+        String operand2 = operand[1] == -1 ? "Operand2" : Integer.toString(operand[1]);
+        String operatorText = "Operator";
+        String count = "";
+
+        if(operator == 10) operatorText = "+";
+        else if(operator == 11) operatorText = "-";
+
+        if(operand[0] != -1 && operand[1] != -1 && operator != -1)
+        {
+            if(operator == 10) count = " = " + Integer.toString(operand[0]+operand[1]);
+            else if(operator == 11) count = " = " + Integer.toString(operand[0]-operand[1]);
+        }
+
+        String predictedText = operand1 + " " + operatorText + " " + operand2 + count;
+        textNumber.setText(predictedText);
     }
 
     private boolean isPixelBlack(int pixel) {
