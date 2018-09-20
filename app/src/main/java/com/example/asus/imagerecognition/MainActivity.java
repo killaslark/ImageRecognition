@@ -36,17 +36,31 @@ public class MainActivity extends AppCompatActivity {
     private Integer REQUEST_CAMERA = 1, SELECT_FILE = 0;
 
     private int[] chainFrequency = new int[8];
-    private final int[][] numberFrequency = new int[][]{
-            {16,12,42,12,16,13,40,13},
-            { 9, 0,65, 8,14, 1,58,14},
-            {51,12,28,38,61, 8,26,44},
-            {44,27,37,28,45,27,36,29},
-            {13, 1,63, 1,41, 1,35,29},
-            {65,21,44,24,59,22,48,19},
-            {32,22,40,23,31,21,43,21},
-            {41, 0,39,25,38, 1,40,23},
-            {23,19,28,19,22,20,27,19},
-            {32,21,42,21,33,21,41,22}
+    private final double[][] numberFrequency = new double[][]{
+            //Angka 0
+            {0.097560976,0.073170732,0.256097561,0.073170732,0.097560976,0.079268293,0.243902439,0.079268293},
+            //Angka 1
+            {0.053254438,          0,0.384615385,0.047337278,0.082840237, 0.00591716,0.343195266,0.082840237},
+            //Angka 2
+            {0.190298507,0.044776119,0.104477612,0.141791045,0.22761194,0.029850746,0.097014925,0.164179104},
+            //Angka 3
+            {0.161172161,0.098901099,0.135531136,0.102564103,0.164835165,0.098901099,0.131868132,0.106227106},
+            //Angka 4
+            {0.070652174,0.005434783,0.342391304,0.005434783,0.222826087,0.005434783,0.190217391,0.157608696},
+            //Angka 5
+            {0.215231788,0.069536424,0.145695364,0.079470199,0.195364238,0.072847682,0.158940397,0.062913907},
+            //Angka 6
+            {0.137339056,0.094420601,0.17167382,0.098712446,0.13304721,0.090128755,0.184549356,0.090128755},
+            //Angka 7
+            {0.198067633,0,0.188405797,0.120772947,0.183574879,0.004830918,0.193236715,0.111111111},
+            //Angka 8
+            {0.129943503,0.107344633,0.15819209,0.107344633,0.124293785,0.11299435,0.152542373,0.107344633},
+            //Angka 9
+            {0.137339056,0.090128755,0.180257511,0.090128755,0.141630901,0.090128755,0.175965665,0.094420601},
+            //Simbol +
+            {0.246323529,0.003676471,0.246323529,0.003676471,0.246323529,0.003676471,0.246323529,0.003676471},
+            //Simbol -
+            {0.387096774,0,0.112903226,0,0.387096774,0,0.112903226,0}
     };
 
 
@@ -135,11 +149,11 @@ public class MainActivity extends AppCompatActivity {
             int iKeliling = iStart, jKeliling = jStart;
             checkTimur(iKeliling, jKeliling, bitmap, chainCode, iStart, jStart);
 
-        int minSum = -1;
+        double minSum = -1;
         int idx = -1;
-        for(int i = 0;i<10;i++) {
-            int[] normalizedFreq = normalizeHistogram(chainFrequency,numberFrequency[i]);
-            int sum = 0;
+        double[] normalizedFreq = normalize10Histogram(chainFrequency);
+        for(int i = 0;i<12;i++) {
+            double sum = 0;
             for (int j = 0; j < 8; j++) {
                 sum += Math.abs(numberFrequency[i][j] - normalizedFreq[j]);
             }
@@ -297,6 +311,20 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+    }
+
+    private double[] normalize10Histogram(int[] arr)
+    {
+        double[] newHist = new double[arr.length];
+        int sum = 0;
+
+        for(int i = 0;i < arr.length;i++)
+            sum += arr[i];
+
+        for(int i = 0;i < arr.length;i++)
+            newHist[i] = (float)arr[i] / (float)sum;
+
+        return newHist;
     }
 
     private int[] normalizeHistogram(int[] from, int[] to)
