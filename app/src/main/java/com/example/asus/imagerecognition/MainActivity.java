@@ -31,7 +31,9 @@ import java.util.Vector;
 public class MainActivity extends AppCompatActivity {
 
     private Bitmap bitmap;
+    private Bitmap skeletonBitmap;
     private ImageView imageNumber;
+    private ImageView imageSkeleton;
     private TextView textNumber;
     private Integer REQUEST_CAMERA = 1, SELECT_FILE = 0;
 
@@ -75,7 +77,9 @@ public class MainActivity extends AppCompatActivity {
 
         Button buttonPredict = (Button) findViewById(R.id.buttonPredict);
         Button buttonUpload = (Button) findViewById(R.id.buttonUpload);
+        Button buttonThin = (Button) findViewById(R.id.buttonThin);
         imageNumber = (ImageView) findViewById(R.id.imageNumber);
+        imageSkeleton = (ImageView) findViewById(R.id.imageSkeleton);
         textNumber = (TextView) findViewById(R.id.textView);
 
         buttonUpload.setOnClickListener(new View.OnClickListener() {
@@ -91,6 +95,19 @@ public class MainActivity extends AppCompatActivity {
                 predictNumber();
             }
         });
+
+        buttonThin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(bitmap != null)
+                {
+                    Skeletonization skeletonization = new Skeletonization(bitmap);
+                    skeletonBitmap = skeletonization.getBitmap();
+                    imageSkeleton.setImageBitmap(skeletonBitmap);
+                }
+            }
+        });
+
 
         for (int i = 0; i < 8 ; i++) {
             chainFrequency[i] = 0;
