@@ -60,7 +60,8 @@ public class Skeletonization {
     private int[][] thin(int[][] pixels){
         List<Point> toWhite = new ArrayList<Point>();
         boolean change = true;
-        for(int i = 0; i < 30; i++){
+        boolean done = false;
+        while(!done){
             change = !change;
             for(int x = 0; x < pixels.length; x++){
                 for(int y = 0; y < pixels[x].length; y++){
@@ -87,6 +88,8 @@ public class Skeletonization {
             }
             for (Point p : toWhite)
                 pixels[p.x][p.y] = 0;
+            if(toWhite.size() == 0)
+                done = true;
             toWhite.clear();
         }
 //        for(int y = 0; y < bmp.getHeight(); y++){
